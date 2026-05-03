@@ -1,17 +1,13 @@
-# Build stage
-FROM node:20-slim AS build
+FROM python:3.11-slim
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN npm run build
 
-# Production stage
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+ENV PORT 8080
 
-
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
 
